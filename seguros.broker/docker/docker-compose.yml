@@ -1,0 +1,70 @@
+
+version: '3.3'
+
+services:
+  mariadb:
+    image: mariadb:10.2
+    environment:
+      HOSTNAME: mariadb
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: mps
+      MYSQL_USER: mps
+      MYSQL_PASSWORD: mps123
+    restart: on-failure
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    networks:
+      backend:
+        ipv4_address: 172.16.0.2
+  zookeeper:
+    image: wurstmeister/zookeeper
+    environment:
+      HOSTNAME: zookeeper
+    ports:
+      - "2181"
+    expose:
+      - "2181"
+    networks:
+      backend:
+        ipv4_address: 172.16.0.3
+  kafka:
+    image: wurstmeister/kafka
+    environment:
+      HOSTNAME: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    expose:
+      - "9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 172.16.0.4
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "mps-stream:1:1,mps-request-reply-stream:1:1"
+      KAFKA_ZOOKEEPER_TIMEOUT_MS: 1600
+    networks:
+      backend:
+        ipv4_address: 172.16.0.4
+  mps:
+    image: mps.service:latest
+    depends_on:
+      - mariadb
+      - kafka
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    networks:
+      backend:
+        ipv4_address: 172.16.0.5
+    command: sh -c 'bin/wait-for mariadb:3306'
+networks:     
+  backend:
+    driver: "bridge"
+    driver_opts:
+        com.docker.network.enable_ipv6: "false"
+    ipam:
+        driver: default
+        config:
+          - subnet: 172.16.0.0/24
