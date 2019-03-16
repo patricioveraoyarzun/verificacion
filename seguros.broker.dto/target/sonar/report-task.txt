@@ -1,0 +1,7 @@
+organization=patricioveraoyarzun-github
+projectKey=patricioveraoyarzun_verificacion
+serverUrl=https://sonarcloud.io
+serverVersion=7.7.0.22792
+dashboardUrl=https://sonarcloud.io/dashboard?id=patricioveraoyarzun_verificacion
+ceTaskId=AWmEZDvYO5STJbyX0nva
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AWmEZDvYO5STJbyX0nva
